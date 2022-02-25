@@ -66,8 +66,48 @@ struct ContentView: View {
             Spacer()
             
         }
+        // When the app opens, get a new joke from the web service
+        .task {
+            
+            // Assemble the URL that points to the endpoint
+            let url = URL(string: "https://api.forismatic.com/api/1.0/?method=getQuote&key=457653&format=json&lang=en/")!
+            
+           //define the types of data we want fromthe endpoint
+            var request = URLRequest(url:url)
+            
+            //ask for JSON data (it is set to only accept JSON in your response)
+            request.setValue("application/json",
+                             forHTTPHeaderField: "Accept")
+            
+            //Start a session to interact (talk with the endpoint
+            let urlSession = URLSession.shared
+            
+            //error, might not work so we need a de-catch block
+            do {
+                
+                // get the raw data from the endpoint
+                //  constant
+                let (data, _) = try await urlSession.data(for: request)
+                
+                // Attempt to decode the raw data into a Swift structure
+                // Takes what is in "data" and tries to put it into "currentJoke"
+                //                                 DATA TYPE TO DECODE TO
+                //                                         |
+                //                                         V
+                currentQuote = try JSONDecoder().decode(Quote.self, from: data)
+                
+                
+            } catch {
+                //catch block is failing code
+                print("Could not retrieve or decode the JSON from endpoint.")
+                // Print the contents of the "error" constant that the do-catch block
+                // populates
+                print(error)
+            }
         
-
+                          
+        }
+                                                                                    
         .navigationTitle("Quotes")
         .padding()
     }
